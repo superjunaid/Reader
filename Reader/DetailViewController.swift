@@ -10,6 +10,7 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
+    @IBOutlet weak var webview: UIWebView!
     @IBOutlet weak var detailDescriptionLabel: UILabel!
     
     
@@ -22,9 +23,8 @@ class DetailViewController: UIViewController {
     
     func configureView() {
         // Update the user interface for the detail item.
-        if let label = self.detailDescriptionLabel {
-            label.text = "Item Tapped"
-        }
+        webview.loadHTMLString("Hello World", baseURL: nil)
+    
     }
     
     override func viewDidLoad() {

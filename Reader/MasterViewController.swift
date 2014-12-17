@@ -46,9 +46,21 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                 println(error)
             } else {
                 
+                var request = NSFetchRequest(entityName: "BlogItems")
+                    request.returnsObjectsAsFaults = false
+                var results = context.executeFetchRequest(request, error: nil)!
+               
+                for result in results {
+                    
+                    context.deleteObject(result as NSManagedObject)
+                    
+                  context.save(nil)
+                    
+                }
+                
                 let jsonResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.MutableContainers, error: nil) as NSDictionary
                 
-                // println(jsonResult["posts"]![0])
+                println(jsonResult["posts"]![0])
                 
                 var posts = [[String:String]()]
                 var post:AnyObject
@@ -64,7 +76,9 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                     posts[i]["title"] = post["title"] as? NSString
                     posts[i]["publishedDate"] = post["date"] as? NSString
                     authorDictionary = post["author"] as NSDictionary
-                    posts[i]["author"] = post["name"] as? NSString
+                    posts[i]["author"] = authorDictionary["name"] as? NSString
+                    
+                    //println(posts)
                     
 //                    Create content in the Core Data
                     newBlogPost = NSEntityDescription.insertNewObjectForEntityForName("BlogItems", inManagedObjectContext: context) as NSManagedObject
@@ -80,13 +94,13 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                     
                     }
                 
-               var request = NSFetchRequest(entityName:"BlogItems")
+                request = NSFetchRequest(entityName:"BlogItems")
                 
                 request.returnsObjectsAsFaults = false
                 
-               var results = context.executeFetchRequest(request, error: nil)
+                results = context.executeFetchRequest(request, error: nil)!
                 
-                println(results!)
+                //println(results)
 
             }
             
@@ -142,20 +156,20 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     // MARK: - Table View
     
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return self.fetchedResultsController.sections!.count
         
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionInfo = self.fetchedResultsController.sections![section] as NSFetchedResultsSectionInfo
-        return 3
+        return sectionInfo.numberOfObjects
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as UITableViewCell
         
-        cell.textLabel?.text = "Blog Item"
-        //self.configureCell(cell, atIndexPath: indexPath)
+        //cell.textLabel?.text = "Blog Item"
+        self.configureCell(cell, atIndexPath: indexPath)
         
         return cell
     }
@@ -182,7 +196,8 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
         let object = self.fetchedResultsController.objectAtIndexPath(indexPath) as NSManagedObject
-        cell.textLabel!.text = object.valueForKey("timeStamp")!.description
+        cell.textLabel!.text = object.valueForKey("title")!.description
+        cell.detailTextLabel!.text = object.valueForKey("author")!.description
     }
     
     // MARK: - Fetched results controller
@@ -194,14 +209,14 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         
         let fetchRequest = NSFetchRequest()
         // Edit the entity name as appropriate.
-        let entity = NSEntityDescription.entityForName("Event", inManagedObjectContext: self.managedObjectContext!)
+        let entity = NSEntityDescription.entityForName("BlogItems", inManagedObjectContext: self.managedObjectContext!)
         fetchRequest.entity = entity
         
         // Set the batch size to a suitable number.
         fetchRequest.fetchBatchSize = 20
         
         // Edit the sort key as appropriate.
-        let sortDescriptor = NSSortDescriptor(key: "timeStamp", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "datePublished", ascending: false)
         let sortDescriptors = [sortDescriptor]
         
         fetchRequest.sortDescriptors = [sortDescriptor]
