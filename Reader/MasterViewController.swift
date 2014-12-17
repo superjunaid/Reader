@@ -48,7 +48,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                 
                 let jsonResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.MutableContainers, error: nil) as NSDictionary
                 
-                 println(jsonResult["posts"]![0])
+                // println(jsonResult["posts"]![0])
                 
                 var posts = [[String:String]()]
                 var post:AnyObject
@@ -80,13 +80,13 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                     
                     }
                 
-                var request = NSFetchRequest(entityName:"BlogItems")
+               var request = NSFetchRequest(entityName:"BlogItems")
                 
                 request.returnsObjectsAsFaults = false
                 
-                var results = context.executeFetchRequest(request, error: nil)
+               var results = context.executeFetchRequest(request, error: nil)
                 
-                println(results)
+                println(results!)
 
             }
             
