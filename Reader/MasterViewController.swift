@@ -26,6 +26,11 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+
+        // Setup Core Data
+        var appDel:AppDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+        var context:NSManagedObjectContext = appDel.managedObjectContext!
+    
         
         // Download content from the web
         let urlPath = "http://www.superjunaid.com/?json=1"
@@ -43,12 +48,12 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                 
                 let jsonResult = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.MutableContainers, error: nil) as NSDictionary
                 
-                // println(jsonResult["posts"]![0])
+                 println(jsonResult["posts"]![0])
                 
                 var posts = [[String:String]()]
                 var post:AnyObject
                 var authorDictionary:AnyObject
-                
+                var newBlogPost:NSManagedObject
                 
                 for var i = 0; i < jsonResult["posts"]!.count; i++ {
                     
@@ -61,15 +66,34 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                     authorDictionary = post["author"] as NSDictionary
                     posts[i]["author"] = post["name"] as? NSString
                     
+//                    Create content in the Core Data
+                    newBlogPost = NSEntityDescription.insertNewObjectForEntityForName("BlogItems", inManagedObjectContext: context) as NSManagedObject
                     
-                }
+                    
+                    newBlogPost.setValue(posts[i]["author"], forKey: "author")
+                    newBlogPost.setValue(posts[i]["title"], forKey: "title")
+                    newBlogPost.setValue(posts[i]["content"], forKey: "content")
+                    newBlogPost.setValue(posts[i]["publishedDate"], forKey: "datePublished")
+                    
+                    context.save(nil)
+                    
+                    
+                    }
                 
-                println(posts)
+                var request = NSFetchRequest(entityName:"BlogItems")
                 
+                request.returnsObjectsAsFaults = false
+                
+                var results = context.executeFetchRequest(request, error: nil)
+                
+                println(results)
+
             }
             
         })
         task.resume()
+        
+
         
         // Default Split View Functionality
         if let split = self.splitViewController {
